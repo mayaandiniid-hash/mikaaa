@@ -11,16 +11,16 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: 'Earning Reward - Interactive Onboarding',
-  description: 'Interactive educational game onboarding and learning dashboard with Dokter Aurel guide, personalized curriculum, and BOT WA rewards.',
+  description: 'Interactive educational learning and reward dashboard with glowing animated Gemini Star companion, personalized curriculum, and BOT WA rewards.',
   openGraph: {
     title: 'Earning Reward - Interactive Onboarding',
-    description: 'Interactive educational game onboarding and learning dashboard with Dokter Aurel guide, personalized curriculum, and BOT WA rewards.',
+    description: 'Interactive educational learning and reward dashboard with glowing animated Gemini Star companion, personalized curriculum, and BOT WA rewards.',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Earning Reward - Interactive Onboarding',
-    description: 'Interactive educational game onboarding and learning dashboard with Dokter Aurel guide, personalized curriculum, and BOT WA rewards.',
+    description: 'Interactive educational learning and reward dashboard with glowing animated Gemini Star companion, personalized curriculum, and BOT WA rewards.',
   },
 };
 

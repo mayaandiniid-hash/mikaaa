@@ -4,34 +4,35 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
 import {
-  Sparkles,
+  MoreHorizontal,
   BookOpen,
-  Trophy,
-  Gift,
-  Coins,
-  Volume2,
-  VolumeX,
-  RotateCcw,
+  Clock,
+  Compass,
+  Smile,
+  Sparkles,
+  Theater,
+  Search,
   CheckCircle2,
   ChevronRight,
   Flame,
-  Zap,
   Bot,
   User,
-  Shield,
-  Calendar,
-  Layers,
-  ArrowUpRight,
+  RotateCcw,
+  Zap,
+  ArrowRight,
+  BookCheck,
+  Star,
+  Award,
 } from 'lucide-react';
-import { EducationLevel, EDUCATION_LEVEL_OPTIONS } from '@/types/onboarding';
-import { Education3DIcon } from '@/components/onboarding/Education3DIcons';
-import { DokterAurel } from '@/components/onboarding/DokterAurel';
+import { EducationLevel } from '@/types/onboarding';
+import { GeminiStarLogo } from '@/components/gemini/GeminiStarLogo';
+import { FunfluentTopHeader } from '@/components/home/FunfluentTopHeader';
+import { LandscapeGeminiBanner } from '@/components/home/LandscapeGeminiBanner';
+import { BottomNavBar, NavTab } from '@/components/home/BottomNavBar';
+import { QuizModalWithTimer } from '@/components/home/QuizModalWithTimer';
+import { WABotRewardStore } from '@/components/home/WABotRewardStore';
 import {
   getSubjectsForLevel,
-  SMK_VOCATIONAL_TRACKS,
-  SMKTrack,
-  KULIAH_PROGRAMS,
-  KuliahProgram,
   Subject,
   WA_BOT_REWARDS,
   WABotReward,
@@ -41,23 +42,17 @@ import {
   toggleSound,
   playButtonClick,
   playSuccessSound,
-  playCounterTick,
 } from '@/lib/audio/soundManager';
-import { AdaptiveTopHeader } from '@/components/home/AdaptiveTopHeader';
-import { SubjectHorizontalSlider } from '@/components/home/SubjectHorizontalSlider';
-import { QuizModalWithTimer } from '@/components/home/QuizModalWithTimer';
-import { WABotRewardStore } from '@/components/home/WABotRewardStore';
-import { BottomNavBar, NavTab } from '@/components/home/BottomNavBar';
 
 export function GameHarianHome() {
   const router = useRouter();
 
-  // User Profile from Onboarding State (Hydration safe lazy initializers)
+  // User Profile
   const [userName, setUserName] = useState(() => {
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('userName') || 'Siswa Cerdas';
+      return localStorage.getItem('userName') || 'Amel';
     }
-    return 'Siswa Cerdas';
+    return 'Amel';
   });
 
   const [userAge, setUserAge] = useState(() => {
@@ -73,7 +68,7 @@ export function GameHarianHome() {
       const stored = localStorage.getItem('educationLevel') as EducationLevel;
       if (stored) return stored;
     }
-    return 'SMA';
+    return 'SD';
   });
 
   const [soundActive, setSoundActive] = useState(() => {
@@ -84,45 +79,42 @@ export function GameHarianHome() {
     return true;
   });
 
-  // Configurable tracks for SMK & Kuliah
-  const [smkTrack, setSmkTrack] = useState<SMKTrack>('Rekayasa Perangkat Lunak');
-  const [kuliahProgram, setKuliahProgram] = useState<KuliahProgram>(
-    'Teknik Informatika / Ilmu Komputer'
-  );
-  const [selectedSemester, setSelectedSemester] = useState(3);
-
-  // Search filter query controlled by Top Header Search Pill
-  const [searchQuery, setSearchQuery] = useState('');
-
-  // Game Economy State: Points & Tokens (High cost rewards economy)
-  const [points, setPoints] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('userPoints');
-      if (stored) return parseInt(stored, 10);
-    }
-    return 1550; // generous starting point so user can test redeeming BOT WA 1 Hari (1.250 XP) immediately!
-  });
-
-  const [tokens, setTokens] = useState(() => {
+  // Economy & Progress
+  const [level, setLevel] = useState(2);
+  const [levelProgress, setLevelProgress] = useState(65);
+  const [coins, setCoins] = useState(() => {
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem('userTokens');
       if (stored) return parseInt(stored, 10);
     }
-    return 5;
+    return 28;
   });
+  const [xpPoints, setXpPoints] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('userPoints');
+      if (stored) return parseInt(stored, 10);
+    }
+    return 485;
+  });
+  const [dayChallengeCount, setDayChallengeCount] = useState(10);
+  const [booksReadCount, setBooksReadCount] = useState(14);
+  const [learningMinutes, setLearningMinutes] = useState(40);
+  const [language, setLanguage] = useState<'ENG' | 'IDN'>('ENG');
 
-  const [dailyStreak, setDailyStreak] = useState(3);
-  const [hasClaimedDaily, setHasClaimedDaily] = useState(false);
-
-  // Active Bottom Navigation Tab: 'home' | 'subjects' | 'game' | 'rewards' | 'profile'
+  // Navigation tab matching Foto 2: 'home' | 'search' | 'mybook' | 'quiz' | 'profile'
   const [activeNavTab, setActiveNavTab] = useState<NavTab>('home');
 
-  // Interactive Quiz Modal with Timer & Hints
-  const [activeQuizSubject, setActiveQuizSubject] = useState<Subject | null>(
-    null
-  );
+  // Search and Filter
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('Adventure');
 
-  // Anti-Zoom & Stability Prevention (Ensures viewport stability on all touch devices)
+  // Interactive Quiz Modal
+  const [activeQuizSubject, setActiveQuizSubject] = useState<Subject | null>(null);
+
+  // Curriculum subjects
+  const subjects = getSubjectsForLevel(educationLevel);
+
+  // Prevent touch zoom on mobile
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
@@ -131,52 +123,24 @@ export function GameHarianHome() {
         e.preventDefault();
       }
     };
-
-    let lastTouchEnd = 0;
-    const preventDoubleTapZoom = (e: TouchEvent) => {
-      const now = Date.now();
-      if (now - lastTouchEnd <= 300) {
-        e.preventDefault();
-      }
-      lastTouchEnd = now;
-    };
-
-    const preventGesture = (e: Event) => {
-      e.preventDefault();
-    };
-
-    document.addEventListener('touchstart', preventTouchZoom, {
-      passive: false,
-    });
-    document.addEventListener('touchend', preventDoubleTapZoom, {
-      passive: false,
-    });
-    window.addEventListener('gesturestart', preventGesture);
-    window.addEventListener('gesturechange', preventGesture);
-
+    document.addEventListener('touchstart', preventTouchZoom, { passive: false });
     return () => {
       document.removeEventListener('touchstart', preventTouchZoom);
-      document.removeEventListener('touchend', preventDoubleTapZoom);
-      window.removeEventListener('gesturestart', preventGesture);
-      window.removeEventListener('gesturechange', preventGesture);
     };
   }, []);
-
-  // Save Points and Tokens to localStorage when changed
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        localStorage.setItem('userPoints', points.toString());
-        localStorage.setItem('userTokens', tokens.toString());
-      } catch (e) {
-        console.warn('Failed to save stats to localStorage', e);
-      }
-    }
-  }, [points, tokens]);
 
   const handleToggleSound = () => {
     const next = toggleSound();
     setSoundActive(next);
+  };
+
+  const handleToggleLang = () => {
+    setLanguage((prev) => (prev === 'ENG' ? 'IDN' : 'ENG'));
+  };
+
+  const handleAddCoins = () => {
+    playSuccessSound();
+    setCoins((prev) => prev + 5);
   };
 
   const handleResetOnboarding = () => {
@@ -189,475 +153,567 @@ export function GameHarianHome() {
     router.push('/');
   };
 
-  const handleClaimDailyStreak = () => {
-    if (hasClaimedDaily) return;
-    playSuccessSound();
-    // Rapid counter sound will automatically be triggered by AnimatedCounter
-    setDailyStreak((prev) => prev + 1);
-    setPoints((prev) => prev + 100);
-    setTokens((prev) => prev + 2);
-    setHasClaimedDaily(true);
-  };
-
-  // Use 1 Token to add +15s extra time during quiz
-  const handleUseTokenForTime = (): boolean => {
-    if (tokens >= 1) {
-      setTokens((prev) => prev - 1);
-      return true;
-    }
-    return false;
-  };
-
-  // Quiz completed callback
   const handleQuizCompleted = (xpEarned: number, tokensEarned: number) => {
-    setPoints((prev) => prev + xpEarned);
-    setTokens((prev) => prev + tokensEarned);
+    setXpPoints((prev) => prev + xpEarned);
+    setCoins((prev) => prev + (tokensEarned || 2));
+    setBooksReadCount((prev) => prev + 1);
+    setLearningMinutes((prev) => prev + 5);
+    setLevelProgress((prev) => Math.min(100, prev + 15));
   };
 
-  // Bot WA redeemed callback
   const handleRedeemWABot = (reward: WABotReward) => {
-    setPoints((prev) => Math.max(0, prev - reward.xpCost));
+    setXpPoints((prev) => Math.max(0, prev - reward.xpCost));
   };
 
-  // Get subjects according to personalized level & specialization
-  const subjects = getSubjectsForLevel(educationLevel, smkTrack, kuliahProgram);
+  // Categories matching Foto 2
+  const categories = [
+    {
+      id: 'Adventure',
+      name: 'Adventure',
+      icon: Compass,
+      bgColor: 'bg-[#FFE8D6]',
+      iconColor: 'text-[#E5832E]',
+      border: 'border-[#FCD5B5]',
+    },
+    {
+      id: 'Comedy',
+      name: 'Comedy',
+      icon: Smile,
+      bgColor: 'bg-[#FEF0C7]',
+      iconColor: 'text-[#D97706]',
+      border: 'border-[#FDE68A]',
+    },
+    {
+      id: 'Fantasy',
+      name: 'Fantasy',
+      icon: Sparkles,
+      bgColor: 'bg-[#E0F2FE]',
+      iconColor: 'text-[#0284C7]',
+      border: 'border-[#BAE6FD]',
+    },
+    {
+      id: 'Drama',
+      name: 'Drama',
+      icon: Theater,
+      bgColor: 'bg-[#FCE7F3]',
+      iconColor: 'text-[#DB2777]',
+      border: 'border-[#FBCFE8]',
+    },
+  ];
 
-  const currentOption =
-    EDUCATION_LEVEL_OPTIONS.find((o) => o.id === educationLevel) ||
-    EDUCATION_LEVEL_OPTIONS[2];
+  // Popular Books matching Foto 2
+  const popularBooks = [
+    {
+      id: 1,
+      title: "Jack's Adventure in Search of Treasure",
+      author: 'Roald Dahl',
+      category: 'Adventure',
+      badgeColor: 'bg-[#E5832E]',
+      coverBg: 'from-amber-400 via-orange-400 to-rose-400',
+      avatar: '👨‍🎨',
+      illustration: '⛵️',
+      xp: 50,
+      coins: 8,
+    },
+    {
+      id: 2,
+      title: 'Maggie The Spirited Little Witch',
+      author: 'Oli Watkins',
+      category: 'Adventure',
+      badgeColor: 'bg-[#7C3AED]',
+      coverBg: 'from-indigo-400 via-purple-400 to-pink-400',
+      avatar: '🧙‍♀️',
+      illustration: '🧹',
+      xp: 60,
+      coins: 10,
+    },
+    {
+      id: 3,
+      title: 'The Secret of Mathematical Island',
+      author: 'Amel & Friends',
+      category: 'Fantasy',
+      badgeColor: 'bg-[#0284C7]',
+      coverBg: 'from-sky-400 via-teal-400 to-emerald-400',
+      avatar: '🔭',
+      illustration: '🏝️',
+      xp: 45,
+      coins: 6,
+    },
+  ];
 
   return (
-    <div className="relative w-full min-h-[100dvh] bg-gradient-to-b from-sky-100 via-indigo-50/40 to-purple-100 text-slate-800 flex flex-col pb-28 select-none overflow-x-hidden">
-      {/* Dynamic Background Lighting Blobs */}
+    <div className="relative w-full min-h-[100dvh] bg-[#FCF9F2] text-slate-800 flex flex-col pb-24 select-none overflow-x-hidden font-sans">
+      {/* Subtle Pastel Background Lighting matching Foto 2 */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
-        <div className="absolute -top-24 -left-24 w-96 h-96 bg-sky-300/35 rounded-full blur-3xl" />
-        <div className="absolute top-1/3 -right-24 w-96 h-96 bg-purple-300/30 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 left-1/4 w-80 h-80 bg-teal-200/25 rounded-full blur-3xl" />
+        <div className="absolute top-0 inset-x-0 h-96 bg-gradient-to-b from-[#E2F4FD] via-[#F0F8FD] to-transparent" />
+        <div className="absolute -top-12 -left-12 w-64 h-64 bg-sky-200/30 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 -right-16 w-72 h-72 bg-amber-100/40 rounded-full blur-3xl" />
       </div>
 
-      {/* ADAPTIVE TOP HEADER (Inspired by user's reference mockup photo with iPhone Dynamic Island, Search Pill & Status Bar) */}
-      <AdaptiveTopHeader
-        activeTab={activeNavTab}
-        userName={userName}
-        educationLevel={educationLevel}
-        userAge={userAge}
-        points={points}
-        tokens={tokens}
-        dailyStreak={dailyStreak}
-        hasClaimedDaily={hasClaimedDaily}
-        soundActive={soundActive}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        onToggleSound={handleToggleSound}
-        onClaimStreak={handleClaimDailyStreak}
-      />
+      {/* TOP HEADER: Exact match of Foto 2 with Level 2 pill, + 28 coins, ENG */}
+      <div className="w-full max-w-[390px] mx-auto px-3">
+        <FunfluentTopHeader
+          level={level}
+          progressPercent={levelProgress}
+          coins={coins}
+          language={language}
+          soundActive={soundActive}
+          onToggleSound={handleToggleSound}
+          onAddCoins={handleAddCoins}
+          onToggleLang={handleToggleLang}
+        />
+      </div>
 
-      {/* MAIN CONTENT WITH IPHONE FLUID MOTION BLUR TRANSITIONS */}
-      <main className="w-full max-w-[440px] mx-auto px-4 mt-3 flex-1 flex flex-col gap-4 z-10">
+      {/* MAIN CONTAINER */}
+      <main className="w-full max-w-[390px] mx-auto px-4 flex-1 flex flex-col gap-3.5 z-10">
         <AnimatePresence mode="wait">
-          {/* ============================== */}
-          {/* TAB 1: HOME (DASHBOARD)        */}
-          {/* ============================== */}
+          {/* ======================================================== */}
+          {/* TAB 1: HOME SCREEN (LEFT PHONE IN FOTO 2 PERSIS!)        */}
+          {/* ======================================================== */}
           {activeNavTab === 'home' && (
             <motion.div
-              key="tab-home"
-              initial={{ opacity: 0, y: 16, filter: 'blur(10px)', scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, filter: 'blur(0px)', scale: 1 }}
-              exit={{ opacity: 0, y: -16, filter: 'blur(10px)', scale: 0.98 }}
-              transition={{
-                duration: 0.32,
-                ease: [0.32, 0.72, 0, 1], // iOS natural fluid curve
-              }}
-              className="space-y-4"
+              key="tab-funfluent-home"
+              initial={{ opacity: 0, y: 12, filter: 'blur(8px)' }}
+              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+              exit={{ opacity: 0, y: -12, filter: 'blur(8px)' }}
+              transition={{ duration: 0.28, ease: [0.32, 0.72, 0, 1] }}
+              className="space-y-3.5"
             >
-              {/* Education Level Personalized Hero Card */}
-              <div className="relative rounded-3xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 p-4 text-white shadow-[0_12px_28px_rgba(79,70,229,0.25)] overflow-hidden">
-                <div className="absolute -right-8 -bottom-8 w-40 h-40 bg-white/10 rounded-full blur-xl pointer-events-none" />
-
-                <div className="flex items-center justify-between relative z-10">
-                  <div className="flex-1 pr-2">
-                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/20 text-white text-[10px] font-black uppercase tracking-wider backdrop-blur-md">
-                      <Sparkles className="w-3 h-3 text-yellow-300" />
-                      <span>Kurikulum Aktif</span>
-                    </div>
-                    <h2 className="text-xl font-black tracking-tight mt-1">
-                      {currentOption.subtitle} ({educationLevel})
-                    </h2>
-                    <p className="text-xs text-blue-100 font-medium line-clamp-2 mt-0.5">
-                      {currentOption.description}
-                    </p>
-                  </div>
-
-                  <div className="flex-shrink-0 p-1 rounded-2xl bg-white/15 backdrop-blur-md shadow-inner">
-                    <Education3DIcon level={educationLevel} size={54} />
-                  </div>
-                </div>
-
-                {/* Specialization Options for SMK / Kuliah */}
-                {educationLevel === 'SMK' && (
-                  <div className="mt-3 pt-3 border-t border-white/20">
-                    <label className="block text-[10px] font-black uppercase tracking-wider text-blue-200 mb-1">
-                      Pilih Jurusan SMK:
-                    </label>
-                    <select
-                      id="select-smk-track-home"
-                      value={smkTrack}
-                      onChange={(e) => {
-                        setSmkTrack(e.target.value as SMKTrack);
-                        playButtonClick();
-                      }}
-                      className="w-full py-1.5 px-3 rounded-xl bg-white text-slate-800 text-xs font-extrabold focus:outline-none focus:ring-2 focus:ring-yellow-400 shadow-sm cursor-pointer"
-                    >
-                      {SMK_VOCATIONAL_TRACKS.map((t) => (
-                        <option key={t} value={t}>
-                          {t}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-
-                {educationLevel === 'KULIAH' && (
-                  <div className="mt-3 pt-3 border-t border-white/20 space-y-2">
-                    <div>
-                      <label className="block text-[10px] font-black uppercase tracking-wider text-blue-200 mb-1">
-                        Program Studi Kuliah:
-                      </label>
-                      <select
-                        id="select-kuliah-program-home"
-                        value={kuliahProgram}
-                        onChange={(e) => {
-                          setKuliahProgram(e.target.value as KuliahProgram);
-                          playButtonClick();
-                        }}
-                        className="w-full py-1.5 px-3 rounded-xl bg-white text-slate-800 text-xs font-extrabold focus:outline-none focus:ring-2 focus:ring-yellow-400 shadow-sm cursor-pointer"
-                      >
-                        {KULIAH_PROGRAMS.map((p) => (
-                          <option key={p} value={p}>
-                            {p}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-                )}
+              {/* 1. Greeting: "Welcome back, [Name]" */}
+              <div className="pt-0.5">
+                <h1 className="text-[21px] font-black text-slate-800 tracking-tight">
+                  Welcome back, {userName}
+                </h1>
               </div>
 
-              {/* SUBJECTS PREVIEW: Horizontal Square Slider with Search Filter */}
-              <SubjectHorizontalSlider
-                subjects={subjects}
-                educationLevel={educationLevel}
-                searchQuery={searchQuery}
-                onSelectSubject={(sub) => setActiveQuizSubject(sub)}
+              {/* 2. Hero Nature Landscape with Floating Animated Glowing Gemini Star Mascot */}
+              <LandscapeGeminiBanner
+                onTapStar={() => {
+                  setCoins((prev) => prev + 1);
+                }}
               />
 
-              {/* Quick Reward Banner Promotion: BOT WA PREMIUM */}
-              <div className="rounded-3xl bg-gradient-to-r from-emerald-500 via-teal-600 to-emerald-700 p-4 text-white shadow-[0_8px_20px_rgba(16,185,129,0.2)] flex items-center justify-between gap-3">
-                <div className="space-y-0.5">
-                  <span className="text-[9px] font-black uppercase tracking-wider bg-white/20 px-2 py-0.5 rounded-full inline-block">
-                    Reward Utama
-                  </span>
-                  <h3 className="text-sm font-black">
-                    BOT WA PREMIUM (1 Hari - 1 Minggu)
-                  </h3>
-                  <p className="text-[11px] text-emerald-100 font-medium">
-                    Tukarkan poin XP kamu sekarang untuk akses bot AI otomatis.
-                  </p>
+              {/* 3. Challenge Card: "10 of 120 Day challenge" */}
+              <div className="w-full rounded-[22px] bg-white p-3.5 shadow-[0_4px_16px_rgba(0,0,0,0.04)] border border-slate-100/80 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  {/* Calendar / Checklist Icon in Soft Lime-Yellow Square */}
+                  <div className="w-10 h-10 rounded-2xl bg-[#EAF7D7] border border-[#D5EFA9] flex items-center justify-center text-[#65A30D] shadow-xs">
+                    <BookCheck className="w-5 h-5 stroke-[2.2]" />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-sm font-black text-slate-800 leading-tight">
+                      {dayChallengeCount} of 120
+                    </span>
+                    <span className="text-[11px] font-semibold text-slate-400">
+                      Day challenge
+                    </span>
+                  </div>
                 </div>
 
+                {/* More options button (...) */}
                 <button
                   type="button"
                   onClick={() => {
                     playButtonClick();
-                    setActiveNavTab('rewards');
+                    setDayChallengeCount((prev) => Math.min(120, prev + 1));
                   }}
-                  className="flex-shrink-0 px-3 py-2 rounded-xl bg-white text-emerald-700 font-black text-xs shadow-md hover:bg-emerald-50 transition-colors flex items-center gap-1 cursor-pointer"
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
                 >
-                  <span>Lihat</span>
-                  <ArrowUpRight className="w-3.5 h-3.5" />
+                  <MoreHorizontal className="w-5 h-5" />
                 </button>
               </div>
 
-              {/* Daily Missions Quick Card */}
-              <div className="rounded-3xl bg-white p-4 shadow-[0_4px_16px_rgba(30,58,138,0.05)] border border-slate-100 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center">
-                      <Zap className="w-4 h-4" />
+              {/* 4. "So for today" Section with 2 Side-by-Side Cards */}
+              <div className="space-y-2">
+                <h2 className="text-sm font-black text-slate-800 tracking-tight">
+                  So for today
+                </h2>
+
+                <div className="grid grid-cols-2 gap-2.5">
+                  {/* Card 1: Books read (14) */}
+                  <div className="rounded-[22px] bg-white p-3 shadow-[0_4px_16px_rgba(0,0,0,0.04)] border border-slate-100/80 flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-2xl bg-[#DDF4E4] flex items-center justify-center text-[#16A34A] shadow-xs flex-shrink-0">
+                      <BookOpen className="w-4 h-4 stroke-[2.5]" />
                     </div>
-                    <div>
-                      <h4 className="text-xs font-black text-slate-800">
-                        Misi Hari Ini
-                      </h4>
-                      <p className="text-[10px] text-slate-400 font-bold">
-                        Selesaikan 1 kuis untuk bonus poin ekstra
-                      </p>
+                    <div className="flex flex-col overflow-hidden">
+                      <span className="text-sm font-black text-slate-800 leading-tight truncate">
+                        {booksReadCount}
+                      </span>
+                      <span className="text-[10px] font-bold text-slate-400 truncate">
+                        Books read
+                      </span>
                     </div>
                   </div>
-                  <span className="text-xs font-black text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full">
-                    +100 XP
-                  </span>
+
+                  {/* Card 2: Learning times (40 mins) */}
+                  <div className="rounded-[22px] bg-white p-3 shadow-[0_4px_16px_rgba(0,0,0,0.04)] border border-slate-100/80 flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-2xl bg-[#FFEBD8] flex items-center justify-center text-[#EA580C] shadow-xs flex-shrink-0">
+                      <Clock className="w-4 h-4 stroke-[2.5]" />
+                    </div>
+                    <div className="flex flex-col overflow-hidden">
+                      <span className="text-sm font-black text-slate-800 leading-tight truncate">
+                        {learningMinutes} mins
+                      </span>
+                      <span className="text-[10px] font-bold text-slate-400 truncate">
+                        Learning times
+                      </span>
+                    </div>
+                  </div>
                 </div>
-
-                <button
-                  type="button"
-                  onClick={() => setActiveQuizSubject(subjects[0])}
-                  className="w-full py-2.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all cursor-pointer"
-                >
-                  <span>Mulai Kuis Kilat Sekarang</span>
-                  <ChevronRight className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            </motion.div>
-          )}
-
-          {/* ========================================= */}
-          {/* TAB 2: PELAJARAN (HORIZONTAL CARDS FOCUS) */}
-          {/* ========================================= */}
-          {activeNavTab === 'subjects' && (
-            <motion.div
-              key="tab-subjects"
-              initial={{ opacity: 0, y: 16, filter: 'blur(10px)', scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, filter: 'blur(0px)', scale: 1 }}
-              exit={{ opacity: 0, y: -16, filter: 'blur(10px)', scale: 0.98 }}
-              transition={{
-                duration: 0.32,
-                ease: [0.32, 0.72, 0, 1],
-              }}
-              className="space-y-4"
-            >
-              <div className="p-3 rounded-2xl bg-blue-50/80 border border-blue-100 flex items-center gap-2 text-blue-900">
-                <BookOpen className="w-4 h-4 text-blue-600 flex-shrink-0" />
-                <p className="text-xs font-bold">
-                  Pilih kotak mata pelajaran di bawah ini. Tekan &quot;Mulai Belajar&quot; untuk membuka kuis interaktif dengan timer dan petunjuk!
-                </p>
               </div>
 
-              {/* Horizontal Slider component with Search Query */}
-              <SubjectHorizontalSlider
-                subjects={subjects}
-                educationLevel={educationLevel}
-                searchQuery={searchQuery}
-                onSelectSubject={(sub) => setActiveQuizSubject(sub)}
-              />
+              {/* 5. "Book category" Section with Circular Category Buttons */}
+              <div className="space-y-2 pb-2">
+                <h2 className="text-sm font-black text-slate-800 tracking-tight">
+                  Book category
+                </h2>
 
-              {/* Subject Overview Grid Info */}
-              <div className="rounded-3xl bg-white p-4 shadow-[0_4px_16px_rgba(30,58,138,0.05)] border border-slate-100 space-y-3">
-                <h4 className="text-xs font-black text-slate-800 flex items-center gap-1.5">
-                  <Layers className="w-4 h-4 text-blue-600" />
-                  <span>Statistik Kurikulum {educationLevel}</span>
-                </h4>
-                <div className="grid grid-cols-2 gap-2 text-xs">
-                  <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100">
-                    <span className="block text-[10px] font-extrabold text-slate-400 uppercase">
-                      Total Materi
-                    </span>
-                    <span className="text-base font-black text-slate-800">
-                      {subjects.length} Modul
-                    </span>
-                  </div>
-                  <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100">
-                    <span className="block text-[10px] font-extrabold text-slate-400 uppercase">
-                      Estimasi Poin
-                    </span>
-                    <span className="text-base font-black text-emerald-600">
-                      +{subjects.length * 75} XP
-                    </span>
-                  </div>
+                <div className="flex items-center justify-between gap-1 overflow-x-auto no-scrollbar py-1">
+                  {categories.map((cat) => {
+                    const Icon = cat.icon;
+                    const isSelected = selectedCategory === cat.id;
+
+                    return (
+                      <button
+                        key={cat.id}
+                        type="button"
+                        onClick={() => {
+                          playButtonClick();
+                          setSelectedCategory(cat.id);
+                          if (subjects.length > 0) {
+                            setActiveQuizSubject(subjects[0]);
+                          }
+                        }}
+                        className="flex flex-col items-center gap-1.5 flex-1 min-w-[70px] cursor-pointer group transition-transform active:scale-95"
+                      >
+                        <div
+                          className={`w-14 h-14 rounded-full ${cat.bgColor} border ${cat.border} flex items-center justify-center shadow-xs transition-all ${
+                            isSelected
+                              ? 'ring-2 ring-[#E5832E] scale-105 shadow-md'
+                              : 'group-hover:scale-102'
+                          }`}
+                        >
+                          <Icon className={`w-6 h-6 ${cat.iconColor} stroke-[2.2]`} />
+                        </div>
+                        <span
+                          className={`text-[11px] tracking-tight ${
+                            isSelected
+                              ? 'font-black text-[#E5832E]'
+                              : 'font-bold text-slate-600'
+                          }`}
+                        >
+                          {cat.name}
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             </motion.div>
           )}
 
-          {/* ============================== */}
-          {/* TAB 3: GAME HARIAN (QUESTS)   */}
-          {/* ============================== */}
-          {activeNavTab === 'game' && (
+          {/* ======================================================== */}
+          {/* TAB 2: SEARCH / DISCOVER (RIGHT PHONE IN FOTO 2 PERSIS!)  */}
+          {/* ======================================================== */}
+          {activeNavTab === 'search' && (
             <motion.div
-              key="tab-game"
-              initial={{ opacity: 0, y: 16, filter: 'blur(10px)', scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, filter: 'blur(0px)', scale: 1 }}
-              exit={{ opacity: 0, y: -16, filter: 'blur(10px)', scale: 0.98 }}
-              transition={{
-                duration: 0.32,
-                ease: [0.32, 0.72, 0, 1],
-              }}
+              key="tab-funfluent-discover"
+              initial={{ opacity: 0, y: 12, filter: 'blur(8px)' }}
+              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+              exit={{ opacity: 0, y: -12, filter: 'blur(8px)' }}
+              transition={{ duration: 0.28, ease: [0.32, 0.72, 0, 1] }}
               className="space-y-3.5"
             >
-              {/* Daily Streak Quest Card */}
-              <div className="rounded-3xl bg-gradient-to-br from-amber-500 via-orange-500 to-rose-500 p-4 text-white shadow-[0_8px_20px_rgba(245,158,11,0.25)]">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <span className="text-[10px] font-black uppercase tracking-wider bg-white/20 px-2 py-0.5 rounded-full">
-                      Misi Harian 1
-                    </span>
-                    <h3 className="text-lg font-black mt-1">Check-in Kehadiran</h3>
-                    <p className="text-xs text-amber-100 font-medium">
-                      Jaga streak belajar setiap hari untuk dapat +100 XP & +2 Koin Token.
-                    </p>
-                  </div>
-                  <Flame className="w-10 h-10 text-yellow-300 animate-bounce" />
-                </div>
+              {/* Header: Discover & Subtitle */}
+              <div className="pt-0.5">
+                <h1 className="text-2xl font-black text-slate-800 tracking-tight">
+                  Discover
+                </h1>
+                <p className="text-xs font-semibold text-slate-400 mt-0.5">
+                  Find your favorite book & quiz
+                </p>
+              </div>
 
-                <div className="mt-3 pt-3 border-t border-white/20 flex items-center justify-between">
-                  <span className="text-xs font-bold">
-                    Streak Aktif: {dailyStreak} Hari Berturut-turut
-                  </span>
+              {/* Search Bar matching Foto 2 */}
+              <div className="relative w-full">
+                <div className="absolute inset-y-0 left-3.5 flex items-center pointer-events-none text-slate-400">
+                  <Search className="w-4 h-4 stroke-[2.5]" />
+                </div>
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search by title & more..."
+                  className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-white border border-slate-200/80 text-xs font-semibold text-slate-800 placeholder-slate-400 shadow-[0_2px_8px_rgba(0,0,0,0.02)] focus:outline-none focus:ring-2 focus:ring-[#E5832E]"
+                />
+              </div>
+
+              {/* Category Filter Chips matching Foto 2 */}
+              <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5">
+                {categories.map((cat) => {
+                  const Icon = cat.icon;
+                  const isSelected = selectedCategory === cat.id;
+
+                  return (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      onClick={() => {
+                        playButtonClick();
+                        setSelectedCategory(cat.id);
+                      }}
+                      className={`px-3 py-1.5 rounded-full text-xs font-black flex items-center gap-1.5 transition-all shadow-xs cursor-pointer whitespace-nowrap ${
+                        isSelected
+                          ? 'bg-[#E5832E] text-white'
+                          : 'bg-white text-slate-700 border border-slate-200/70 hover:bg-slate-50'
+                      }`}
+                    >
+                      <Icon className="w-3.5 h-3.5 stroke-[2.2]" />
+                      <span>{cat.name}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Section: Popular Books with "See all" */}
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-sm font-black text-slate-800 tracking-tight">
+                    Popular books
+                  </h2>
                   <button
                     type="button"
-                    onClick={handleClaimDailyStreak}
-                    disabled={hasClaimedDaily}
-                    className={`px-4 py-2 rounded-xl font-black text-xs transition-all ${
-                      hasClaimedDaily
-                        ? 'bg-white/30 text-white cursor-not-allowed'
-                        : 'bg-white text-orange-600 hover:bg-yellow-100 shadow-md cursor-pointer'
-                    }`}
+                    onClick={() => {
+                      playButtonClick();
+                      if (subjects.length > 0) setActiveQuizSubject(subjects[0]);
+                    }}
+                    className="text-xs font-black text-[#E5832E] hover:underline cursor-pointer"
                   >
-                    {hasClaimedDaily ? 'Sudah Diklaim' : 'Klaim Sekarang'}
+                    See all
                   </button>
+                </div>
+
+                {/* Popular Books Cards Grid */}
+                <div className="grid grid-cols-2 gap-3">
+                  {popularBooks.map((book) => (
+                    <div
+                      key={book.id}
+                      onClick={() => {
+                        playButtonClick();
+                        if (subjects.length > 0) setActiveQuizSubject(subjects[0]);
+                      }}
+                      className="rounded-[24px] bg-white p-2.5 shadow-[0_6px_20px_rgba(0,0,0,0.04)] border border-slate-100 flex flex-col justify-between cursor-pointer group hover:shadow-md transition-all active:scale-98"
+                    >
+                      {/* Book Cover Illustration */}
+                      <div
+                        className={`w-full h-32 rounded-2xl bg-gradient-to-br ${book.coverBg} relative flex flex-col items-center justify-center overflow-hidden p-2 text-white shadow-inner`}
+                      >
+                        {/* Tag Badge on Cover */}
+                        <div className="absolute top-2 right-2 bg-white/90 text-[#E5832E] px-2 py-0.5 rounded-full text-[9px] font-black uppercase shadow-xs">
+                          {book.category}
+                        </div>
+
+                        {/* Central Illustration Emoji/Art */}
+                        <span className="text-4xl filter drop-shadow-md group-hover:scale-110 transition-transform">
+                          {book.illustration}
+                        </span>
+
+                        <div className="absolute bottom-2 left-2 flex items-center gap-1 bg-black/30 backdrop-blur-xs px-1.5 py-0.5 rounded-md text-[9px] font-bold">
+                          <span>+{book.xp} XP</span>
+                        </div>
+                      </div>
+
+                      {/* Title & Author Row */}
+                      <div className="mt-2 space-y-1">
+                        <h3 className="text-xs font-black text-slate-800 line-clamp-2 leading-snug group-hover:text-[#E5832E] transition-colors">
+                          {book.title}
+                        </h3>
+
+                        <div className="flex items-center gap-1 text-[10px] text-slate-400 font-bold">
+                          <span>{book.avatar}</span>
+                          <span className="truncate">{book.author}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
 
-              {/* Flash Quiz Card */}
-              <div className="rounded-3xl bg-white p-4 shadow-[0_4px_20px_rgba(30,58,138,0.06)] border border-slate-100 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-10 h-10 rounded-2xl bg-purple-100 text-purple-600 flex items-center justify-center">
-                      <Zap className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <span className="text-[10px] font-black uppercase text-purple-600">
-                        Misi Harian 2
-                      </span>
-                      <h4 className="text-sm font-black text-slate-800">
-                        Kuis Kilat Edu-Game
-                      </h4>
-                    </div>
-                  </div>
-                  <span className="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-black">
-                    +120 XP
+              {/* Bot WA Store Banner Promo */}
+              <div className="rounded-[24px] bg-gradient-to-r from-emerald-600 to-teal-700 p-3.5 text-white shadow-md flex items-center justify-between gap-3">
+                <div className="space-y-0.5">
+                  <span className="text-[9px] font-black uppercase tracking-wider bg-white/20 px-2 py-0.5 rounded-full inline-block">
+                    Reward Spesial
                   </span>
+                  <h4 className="text-xs font-black">
+                    Tukar Poin Jadi BOT WA Premium
+                  </h4>
+                  <p className="text-[10px] text-emerald-100">
+                    Akses bot AI otomatis untuk belajar 24 jam!
+                  </p>
                 </div>
-
-                <p className="text-xs text-slate-500 font-medium">
-                  Kerjakan materi kuis {educationLevel} dengan timer dan petunjuk untuk mengumpulkan poin reward bot WA premium.
-                </p>
-
                 <button
                   type="button"
-                  onClick={() => setActiveQuizSubject(subjects[0])}
-                  className="w-full py-3 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white font-extrabold text-xs shadow-md active:translate-y-0.5 flex items-center justify-center gap-2 cursor-pointer"
+                  onClick={() => {
+                    playButtonClick();
+                    setActiveNavTab('quiz');
+                  }}
+                  className="px-3 py-1.5 rounded-xl bg-white text-emerald-800 font-black text-xs shadow-sm hover:bg-emerald-50 cursor-pointer flex-shrink-0"
                 >
-                  <Trophy className="w-4 h-4 text-yellow-300" />
-                  <span>Mulai Kuis Kilat Sekarang</span>
+                  Klaim
                 </button>
               </div>
             </motion.div>
           )}
 
-          {/* ================================================ */}
-          {/* TAB 4: HADIAH BOT WA (EXCLUSIVE BOT WA STORE)    */}
-          {/* ================================================ */}
-          {activeNavTab === 'rewards' && (
+          {/* ======================================================== */}
+          {/* TAB 3: MY BOOK (MODUL KURIKULUM BELAJAR SISWA)            */}
+          {/* ======================================================== */}
+          {activeNavTab === 'mybook' && (
             <motion.div
-              key="tab-rewards"
-              initial={{ opacity: 0, y: 16, filter: 'blur(10px)', scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, filter: 'blur(0px)', scale: 1 }}
-              exit={{ opacity: 0, y: -16, filter: 'blur(10px)', scale: 0.98 }}
-              transition={{
-                duration: 0.32,
-                ease: [0.32, 0.72, 0, 1],
-              }}
+              key="tab-funfluent-mybook"
+              initial={{ opacity: 0, y: 12, filter: 'blur(8px)' }}
+              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+              exit={{ opacity: 0, y: -12, filter: 'blur(8px)' }}
+              transition={{ duration: 0.28, ease: [0.32, 0.72, 0, 1] }}
+              className="space-y-3"
             >
+              <div className="pt-0.5">
+                <h1 className="text-2xl font-black text-slate-800 tracking-tight">
+                  My Book & Modul
+                </h1>
+                <p className="text-xs font-semibold text-slate-400 mt-0.5">
+                  Materi kurikulum {educationLevel} milik {userName}
+                </p>
+              </div>
+
+              <div className="space-y-2.5">
+                {subjects.map((sub, idx) => (
+                  <div
+                    key={sub.id}
+                    onClick={() => {
+                      playButtonClick();
+                      setActiveQuizSubject(sub);
+                    }}
+                    className="rounded-[22px] bg-white p-3 shadow-[0_4px_16px_rgba(0,0,0,0.04)] border border-slate-100 flex items-center justify-between cursor-pointer hover:border-[#E5832E]/40 transition-all active:scale-98"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-2xl bg-[#FFE8D6] text-[#E5832E] flex items-center justify-center font-black text-sm">
+                        #{idx + 1}
+                      </div>
+                      <div>
+                        <span className="text-[10px] font-black uppercase text-slate-400">
+                          {sub.category}
+                        </span>
+                        <h4 className="text-xs font-black text-slate-800 leading-snug">
+                          {sub.name}
+                        </h4>
+                        <span className="text-[10px] font-bold text-emerald-600">
+                          +{sub.xpReward} XP • {sub.quizzesAvailable} Soal
+                        </span>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      className="px-3 py-1 rounded-xl bg-[#E5832E] text-white text-[11px] font-black shadow-xs hover:bg-[#d07323] cursor-pointer"
+                    >
+                      Buka
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+
+          {/* ======================================================== */}
+          {/* TAB 4: QUIZ (GAME HARIAN & TOKO BOT WA)                  */}
+          {/* ======================================================== */}
+          {activeNavTab === 'quiz' && (
+            <motion.div
+              key="tab-funfluent-quiz"
+              initial={{ opacity: 0, y: 12, filter: 'blur(8px)' }}
+              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+              exit={{ opacity: 0, y: -12, filter: 'blur(8px)' }}
+              transition={{ duration: 0.28, ease: [0.32, 0.72, 0, 1] }}
+              className="space-y-3.5"
+            >
+              <div className="pt-0.5">
+                <h1 className="text-2xl font-black text-slate-800 tracking-tight">
+                  Quiz & Reward WA
+                </h1>
+                <p className="text-xs font-semibold text-slate-400 mt-0.5">
+                  Selesaikan kuis untuk tukar paket BOT WA Premium
+                </p>
+              </div>
+
+              {/* Bot WA Store Component */}
               <WABotRewardStore
-                userPoints={points}
-                searchQuery={searchQuery}
-                onRedeem={handleRedeemWABot}
+                userPoints={xpPoints}
+                onRedeem={(reward) => handleRedeemWABot(reward)}
               />
             </motion.div>
           )}
 
-          {/* ================================================ */}
-          {/* TAB 5: PROFIL / AKUN                             */}
-          {/* ================================================ */}
+          {/* ======================================================== */}
+          {/* TAB 5: PROFILE                                          */}
+          {/* ======================================================== */}
           {activeNavTab === 'profile' && (
             <motion.div
-              key="tab-profile"
-              initial={{ opacity: 0, y: 16, filter: 'blur(10px)', scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, filter: 'blur(0px)', scale: 1 }}
-              exit={{ opacity: 0, y: -16, filter: 'blur(10px)', scale: 0.98 }}
-              transition={{
-                duration: 0.32,
-                ease: [0.32, 0.72, 0, 1],
-              }}
-              className="space-y-4"
+              key="tab-funfluent-profile"
+              initial={{ opacity: 0, y: 12, filter: 'blur(8px)' }}
+              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+              exit={{ opacity: 0, y: -12, filter: 'blur(8px)' }}
+              transition={{ duration: 0.28, ease: [0.32, 0.72, 0, 1] }}
+              className="space-y-3.5"
             >
-              {/* Student ID Card */}
-              <div className="rounded-3xl bg-white p-5 shadow-[0_8px_25px_rgba(30,58,138,0.06)] border border-slate-100 space-y-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 flex items-center justify-center text-white text-2xl font-black shadow-md shadow-blue-500/20">
-                    {userName.charAt(0).toUpperCase() || 'S'}
-                  </div>
-                  <div>
-                    <h3 className="text-base font-black text-slate-900">
-                      {userName}
-                    </h3>
-                    <p className="text-xs font-bold text-slate-500">
-                      Pelajar Jenjang {educationLevel} • Usia {userAge} Tahun
-                    </p>
-                  </div>
+              <div className="rounded-[24px] bg-white p-4 shadow-[0_6px_20px_rgba(0,0,0,0.04)] border border-slate-100 flex items-center gap-3.5">
+                <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-[#E5832E] to-amber-300 flex items-center justify-center text-white text-2xl shadow-md">
+                  👩‍🎓
                 </div>
-
-                <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 text-xs">
-                  <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100">
-                    <span className="block text-[10px] font-extrabold text-slate-400 uppercase">
-                      Tabungan Poin XP
-                    </span>
-                    <span className="text-sm font-black text-blue-600">
-                      {points.toLocaleString('id-ID')} XP
-                    </span>
-                  </div>
-                  <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100">
-                    <span className="block text-[10px] font-extrabold text-slate-400 uppercase">
-                      Token Koin
-                    </span>
-                    <span className="text-sm font-black text-amber-600">
-                      {tokens} Koin
-                    </span>
+                <div>
+                  <h3 className="text-base font-black text-slate-800">
+                    {userName}
+                  </h3>
+                  <p className="text-xs font-bold text-slate-400">
+                    Jenjang {educationLevel} • Umur {userAge} Tahun
+                  </p>
+                  <div className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-black">
+                    <CheckCircle2 className="w-3 h-3" />
+                    <span>Siswa Aktif</span>
                   </div>
                 </div>
               </div>
 
-              {/* Settings & Reset */}
-              <div className="rounded-3xl bg-white p-4 shadow-sm border border-slate-100 space-y-2">
-                <h4 className="text-xs font-black uppercase text-slate-400 px-1">
-                  Pengaturan Aplikasi
-                </h4>
-
-                <button
-                  type="button"
-                  onClick={handleToggleSound}
-                  className="w-full p-3 rounded-2xl bg-slate-50 hover:bg-slate-100 flex items-center justify-between text-xs font-bold text-slate-700 transition-colors cursor-pointer"
-                >
-                  <div className="flex items-center gap-2">
-                    <Volume2 className="w-4 h-4 text-blue-600" />
-                    <span>Efek Suara Game & Timer</span>
-                  </div>
-                  <span className="text-xs font-black text-blue-600">
-                    {soundActive ? 'AKTIF' : 'NONAKTIF'}
+              {/* Stats overview */}
+              <div className="grid grid-cols-2 gap-2.5">
+                <div className="rounded-[20px] bg-white p-3.5 shadow-xs border border-slate-100">
+                  <span className="text-[10px] font-black uppercase text-slate-400">
+                    Total Poin XP
                   </span>
-                </button>
+                  <p className="text-lg font-black text-[#E5832E] mt-0.5">
+                    {xpPoints} XP
+                  </p>
+                </div>
+                <div className="rounded-[20px] bg-white p-3.5 shadow-xs border border-slate-100">
+                  <span className="text-[10px] font-black uppercase text-slate-400">
+                    Token Koin
+                  </span>
+                  <p className="text-lg font-black text-amber-500 mt-0.5">
+                    {coins} Koin
+                  </p>
+                </div>
+              </div>
 
+              {/* Reset Onboarding Button */}
+              <div className="pt-2">
                 <button
                   type="button"
                   onClick={handleResetOnboarding}
-                  className="w-full p-3 rounded-2xl bg-rose-50 hover:bg-rose-100 flex items-center justify-between text-xs font-bold text-rose-700 transition-colors cursor-pointer"
+                  className="w-full py-3 rounded-2xl bg-white hover:bg-rose-50 text-rose-600 font-extrabold text-xs border border-rose-200 shadow-xs flex items-center justify-center gap-2 cursor-pointer transition-colors"
                 >
-                  <div className="flex items-center gap-2">
-                    <RotateCcw className="w-4 h-4 text-rose-600" />
-                    <span>Ulangi Alur Onboarding Interaktif</span>
-                  </div>
-                  <span className="text-xs font-black">Reset</span>
+                  <RotateCcw className="w-4 h-4" />
+                  <span>Ulangi Onboarding Gemini Star</span>
                 </button>
               </div>
             </motion.div>
@@ -665,40 +721,30 @@ export function GameHarianHome() {
         </AnimatePresence>
       </main>
 
-      {/* FLOATING DOKTER AUREL GUIDE WIDGET (Bottom Right Corner above nav) */}
-      <div className="fixed bottom-20 right-3 z-30 pointer-events-none flex flex-col items-end">
-        <div className="mb-1 bg-white/95 backdrop-blur-md rounded-2xl px-3 py-1.5 shadow-lg border border-cyan-100 text-[11px] font-extrabold text-slate-800 max-w-[210px] text-right pointer-events-auto">
-          {activeNavTab === 'rewards'
-            ? 'Dokter Aurel: Kumpulkan poin untuk BOT WA Premium! 🤖'
-            : activeNavTab === 'subjects'
-            ? 'Dokter Aurel: Geser kotaknya untuk pilih pelajaran! 📚'
-            : `Dokter Aurel: Semangat belajar modul ${educationLevel}, ${userName}! ✨`}
-        </div>
-        <div className="pointer-events-auto cursor-pointer" onClick={() => playButtonClick()}>
-          <DokterAurel size="sm" showBadge={false} withGlow={true} />
-        </div>
-      </div>
-
-      {/* PERSISTENT BOTTOM NAVIGATION WITH GRADIENT BLUR */}
+      {/* FLOATING CURVED WHITE BOTTOM DOCK (MATCHING FOTO 2 PERSIS!) */}
       <BottomNavBar
         activeTab={activeNavTab}
-        onChangeTab={(tab) => setActiveNavTab(tab)}
-        pendingRewardsCount={points >= 1250 ? 1 : 0}
+        onChangeTab={setActiveNavTab}
+        pendingRewardsCount={xpPoints >= 1250 ? 1 : 0}
       />
 
-      {/* INTERACTIVE QUIZ & MATERI MODAL WITH TIMER, COUNTDOWN AUDIO, WARNINGS, & HINTS */}
-      <AnimatePresence>
-        {activeQuizSubject && (
-          <QuizModalWithTimer
-            subject={activeQuizSubject}
-            educationLevel={educationLevel}
-            userTokens={tokens}
-            onClose={() => setActiveQuizSubject(null)}
-            onCompleteQuiz={handleQuizCompleted}
-            onUseTokenForTime={handleUseTokenForTime}
-          />
-        )}
-      </AnimatePresence>
+      {/* QUIZ MODAL WITH TIMER */}
+      {activeQuizSubject && (
+        <QuizModalWithTimer
+          subject={activeQuizSubject}
+          educationLevel={educationLevel}
+          userTokens={coins}
+          onClose={() => setActiveQuizSubject(null)}
+          onCompleteQuiz={handleQuizCompleted}
+          onUseTokenForTime={() => {
+            if (coins >= 1) {
+              setCoins((prev) => prev - 1);
+              return true;
+            }
+            return false;
+          }}
+        />
+      )}
     </div>
   );
 }

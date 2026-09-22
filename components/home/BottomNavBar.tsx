@@ -3,14 +3,14 @@
 import React from 'react';
 import {
   Home,
+  Search,
   BookOpen,
-  Zap,
-  Bot,
+  HelpCircle,
   User,
 } from 'lucide-react';
 import { playButtonClick } from '@/lib/audio/soundManager';
 
-export type NavTab = 'home' | 'subjects' | 'game' | 'rewards' | 'profile';
+export type NavTab = 'home' | 'search' | 'mybook' | 'quiz' | 'profile';
 
 interface BottomNavBarProps {
   activeTab: NavTab;
@@ -23,25 +23,26 @@ export function BottomNavBar({
   onChangeTab,
   pendingRewardsCount = 0,
 }: BottomNavBarProps) {
-  const tabs: { id: NavTab; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
+  const tabs: {
+    id: NavTab;
+    label: string;
+    icon: React.ComponentType<{ className?: string }>;
+  }[] = [
     { id: 'home', label: 'Home', icon: Home },
-    { id: 'subjects', label: 'Pelajaran', icon: BookOpen },
-    { id: 'game', label: 'Game', icon: Zap },
-    { id: 'rewards', label: 'Hadiah WA', icon: Bot },
-    { id: 'profile', label: 'Akun', icon: User },
+    { id: 'search', label: 'Search', icon: Search },
+    { id: 'mybook', label: 'My Book', icon: BookOpen },
+    { id: 'quiz', label: 'Quiz', icon: HelpCircle },
+    { id: 'profile', label: 'Profile', icon: User },
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 flex justify-center pointer-events-none pb-safe">
-      {/* Gradient Blur Ambient Glow behind the bar */}
-      <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-sky-200/60 via-indigo-100/30 to-transparent pointer-events-none -z-10" />
-
-      {/* Floating Bottom Nav Container with frosted glass blur */}
+    <div className="fixed bottom-0 left-0 right-0 z-40 flex justify-center pointer-events-none pb-2 sm:pb-3">
+      {/* Curved White Floating Navigation Dock as seen in Foto 2 */}
       <nav
-        aria-label="Navigasi Utama"
-        className="w-full max-w-[440px] px-3 pb-2 pt-1 pointer-events-auto"
+        aria-label="Funfluent Main Navigation"
+        className="w-full max-w-[390px] px-4 pointer-events-auto"
       >
-        <div className="rounded-3xl bg-white/90 backdrop-blur-xl border-2 border-white/70 shadow-[0_-8px_25px_rgba(30,58,138,0.12)] p-1.5 flex items-center justify-around gap-1">
+        <div className="rounded-[32px] bg-white shadow-[0_10px_35px_rgba(0,0,0,0.1),0_2px_8px_rgba(0,0,0,0.04)] border border-slate-100/80 px-2 py-2 flex items-center justify-between">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -55,19 +56,34 @@ export function BottomNavBar({
                   playButtonClick();
                   onChangeTab(tab.id);
                 }}
-                className={`relative flex-1 py-1.5 px-1 rounded-2xl flex flex-col items-center justify-center gap-0.5 transition-all cursor-pointer ${
-                  isActive
-                    ? 'bg-blue-600 text-white shadow-md shadow-blue-500/25 scale-[1.03]'
-                    : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100/60'
-                }`}
+                className="relative flex-1 flex flex-col items-center justify-center gap-1 cursor-pointer transition-transform active:scale-95 group"
               >
-                <div className="relative">
-                  <Icon className="w-5 h-5" />
-                  {tab.id === 'rewards' && pendingRewardsCount > 0 && (
-                    <span className="absolute -top-1 -right-1.5 w-2.5 h-2.5 bg-emerald-500 rounded-full ring-2 ring-white" />
+                {/* Active Indicator: Warm Amber/Brown circle matching Foto 2 */}
+                <div
+                  className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
+                    isActive
+                      ? 'bg-[#E5832E] text-white shadow-md shadow-orange-500/20'
+                      : 'text-slate-400 group-hover:text-slate-600'
+                  }`}
+                >
+                  <Icon
+                    className={`w-5 h-5 transition-transform ${
+                      isActive ? 'stroke-[2.5]' : 'stroke-[1.8]'
+                    }`}
+                  />
+                  {tab.id === 'search' && pendingRewardsCount > 0 && (
+                    <span className="absolute top-1 right-3 w-2 h-2 bg-emerald-500 rounded-full ring-2 ring-white" />
                   )}
                 </div>
-                <span className="text-[10px] font-black tracking-tight whitespace-nowrap">
+
+                {/* Tab Label */}
+                <span
+                  className={`text-[10px] tracking-tight transition-colors ${
+                    isActive
+                      ? 'font-bold text-[#E5832E]'
+                      : 'font-medium text-slate-400 group-hover:text-slate-600'
+                  }`}
+                >
                   {tab.label}
                 </span>
               </button>

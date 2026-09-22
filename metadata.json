@@ -1,6 +1,6 @@
 {
   "name": "Earning Reward - Interactive Onboarding",
-  "description": "Interactive educational game onboarding and learning dashboard with Dokter Aurel guide, personalized curriculum, and BOT WA rewards.",
+  "description": "Interactive educational learning and reward dashboard with glowing animated Gemini Star companion, personalized curriculum, and BOT WA rewards.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

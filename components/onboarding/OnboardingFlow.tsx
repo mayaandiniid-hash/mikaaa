@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Volume2, VolumeX, Sparkles, RotateCcw } from 'lucide-react';
 import { EducationLevel } from '@/types/onboarding';
-import { DokterAurel } from './DokterAurel';
+import { GeminiStarLogo } from '@/components/gemini/GeminiStarLogo';
 import { CloudSpeechBubble } from './CloudSpeechBubble';
 import { StepWelcome } from './StepWelcome';
 import { StepName } from './StepName';
@@ -54,7 +54,7 @@ export function OnboardingFlow({
   const handleFinish = () => {
     const timestamp = new Date().toISOString();
     try {
-      localStorage.setItem('userName', name || 'Siswa Cerdas');
+      localStorage.setItem('userName', name || 'Amel');
       localStorage.setItem('userAge', age.toString());
       localStorage.setItem('educationLevel', educationLevel);
       localStorage.setItem('onboardingCompleted', 'true');
@@ -67,11 +67,11 @@ export function OnboardingFlow({
     router.push(onCompleteRedirect);
   };
 
-  // Dialogues according to user's specification with Dokter Aurel
+  // Dialogues guided by glowing Gemini Star
   const dialogues = [
     {
       step: 0,
-      text: 'Hai, aku Dokter Aurel! Yuk kenalan dulu. Selamat datang di Earning Reward! Di sini kamu bisa belajar seru dan kumpulkan poin untuk ditukarkan menjadi BOT WA PREMIUM!',
+      text: 'Hai, aku Gemini Star! Bintang pemandu cerdasmu di Earning Reward! Di sini kamu bisa belajar seru dan kumpulkan koin serta XP untuk ditukarkan menjadi BOT WA PREMIUM!',
     },
     {
       step: 1,
@@ -89,7 +89,7 @@ export function OnboardingFlow({
     },
     {
       step: 4,
-      text: 'Profil belajarmu sudah siap! Siap mulai perjalanan edukasimu bersama Dokter Aurel?',
+      text: 'Profil belajarmu sudah siap! Siap mulai petualangan seru bersama Gemini Star?',
     },
   ];
 
@@ -105,15 +105,16 @@ export function OnboardingFlow({
       {/* Top Header Bar */}
       <header className="w-full max-w-[480px] mx-auto px-4 pt-4 pb-2 flex items-center justify-between z-30">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-cyan-600 via-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-cyan-500/20">
-            <Sparkles className="w-4 h-4 text-cyan-200" />
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 flex items-center justify-center text-white shadow-md shadow-purple-500/20">
+            <Sparkles className="w-4 h-4 text-amber-200" />
           </div>
           <div>
             <h1 className="text-xs font-black text-slate-800 tracking-wider uppercase">
               Earning Reward
             </h1>
-            <p className="text-[10px] font-bold text-cyan-700">
-              Pemandu Edukasi: Dokter Aurel
+            <p className="text-[10px] font-bold text-indigo-700 flex items-center gap-1">
+              <span>Pemandu: Gemini Star</span>
+              <span className="inline-block w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping" />
             </p>
           </div>
         </div>
@@ -126,9 +127,9 @@ export function OnboardingFlow({
                 key={s}
                 className={`h-1.5 rounded-full transition-all duration-300 ${
                   s === currentStep
-                    ? 'w-4 bg-cyan-600'
+                    ? 'w-4 bg-indigo-600'
                     : s < currentStep
-                    ? 'w-2 bg-blue-400'
+                    ? 'w-2 bg-cyan-500'
                     : 'w-1.5 bg-slate-300'
                 }`}
               />
@@ -145,8 +146,8 @@ export function OnboardingFlow({
           >
             {soundActive ? (
               <>
-                <Volume2 className="w-3.5 h-3.5 text-cyan-600 animate-pulse" />
-                <span className="hidden sm:inline text-[11px] font-extrabold text-cyan-700">
+                <Volume2 className="w-3.5 h-3.5 text-indigo-600 animate-pulse" />
+                <span className="hidden sm:inline text-[11px] font-extrabold text-indigo-700">
                   SUARA ON
                 </span>
               </>
@@ -162,29 +163,34 @@ export function OnboardingFlow({
         </div>
       </header>
 
-      {/* Main Interactive Stage: Dokter Aurel on the left side with seamless gradient body merge */}
+      {/* Main Interactive Stage: Glowing Gemini Star on the left side with speech bubble */}
       <main className="w-full max-w-[480px] mx-auto px-4 flex-1 flex flex-col justify-center items-center py-2 z-20">
         <div className="w-full flex flex-col items-center">
-          {/* Top Section: Dokter Aurel (Samping Kiri) with Speech Bubble connecting seamlessly */}
-          <div className="w-full grid grid-cols-12 items-end gap-2 mb-2">
-            {/* Dokter Aurel on the Left Side (Transparent background, Lower body fades into page gradient) */}
-            <div className="col-span-5 sm:col-span-4 flex justify-center items-end relative -mb-3 z-30">
-              <DokterAurel
-                size="hero"
-                showBadge={true}
-                withGlow={true}
-                className="w-full"
-              />
+          {/* Top Section: Gemini Star (Glowing & Shifting Color) with Speech Bubble */}
+          <div className="w-full grid grid-cols-12 items-center gap-3 mb-2">
+            {/* Glowing Animated Gemini Star Mascot on the Left */}
+            <div className="col-span-5 sm:col-span-4 flex flex-col justify-center items-center relative z-30">
+              <div className="relative p-2">
+                <GeminiStarLogo
+                  size="hero"
+                  showRays={true}
+                  withParticles={true}
+                />
+                <div className="mt-1 bg-white/90 backdrop-blur-md px-2.5 py-0.5 rounded-full shadow-sm border border-indigo-100 flex items-center gap-1 text-[10px] font-black text-indigo-900 tracking-tight">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                  <span>Gemini Star</span>
+                </div>
+              </div>
             </div>
 
-            {/* Speech Bubble on the Right/Adjacent Side, perfectly pointing to Dokter Aurel */}
-            <div className="col-span-7 sm:col-span-8 flex flex-col justify-end z-20 pb-2">
+            {/* Speech Bubble on the Right/Adjacent Side */}
+            <div className="col-span-7 sm:col-span-8 flex flex-col justify-center z-20">
               <CloudSpeechBubble
                 bubbleKey={`step-${currentStep}`}
                 text={dialogues[currentStep].text}
-                tailPosition="bottom-left"
+                tailPosition="left"
               >
-                {/* Step 0: Welcome Continue Button ("Yuk Kenalan Dulu") */}
+                {/* Step 0: Welcome Continue Button */}
                 {currentStep === 0 && (
                   <StepWelcome onNext={() => handleNextStep(1)} />
                 )}
@@ -192,7 +198,7 @@ export function OnboardingFlow({
             </div>
           </div>
 
-          {/* Form Controls for Steps 1, 2, 3, 4 (rendered cleanly below the doctor & dialogue) */}
+          {/* Form Controls for Steps 1, 2, 3, 4 */}
           {currentStep > 0 && (
             <div className="w-full mt-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
               {/* Step 1: Question 1 - Name */}
@@ -245,14 +251,14 @@ export function OnboardingFlow({
       {/* Bottom Footer Note / Safe Area */}
       <footer className="w-full max-w-[480px] mx-auto px-4 py-3 flex items-center justify-between text-slate-500 text-[11px] font-semibold z-10">
         <span className="truncate flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full bg-cyan-500" />
-          Pemandu Belajar: Dokter Aurel
+          <span className="w-2 h-2 rounded-full bg-cyan-400" />
+          Pemandu Belajar: Gemini Star
         </span>
         {currentStep > 0 && (
           <button
             type="button"
             onClick={() => handleNextStep(currentStep - 1)}
-            className="flex items-center gap-1 text-slate-600 hover:text-cyan-700 font-bold transition-colors cursor-pointer"
+            className="flex items-center gap-1 text-slate-600 hover:text-indigo-700 font-bold transition-colors cursor-pointer"
           >
             <RotateCcw className="w-3 h-3" />
             <span>Kembali</span>

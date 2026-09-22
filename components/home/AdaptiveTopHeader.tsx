@@ -54,7 +54,13 @@ export function AdaptiveTopHeader({
   const [hasUnreadNotification, setHasUnreadNotification] = useState(true);
 
   // Tab dynamic metadata adapting to active bottom navigation
-  const tabConfig = {
+  const tabConfigMap: Record<NavTab, {
+    title: string;
+    subtitle: string;
+    searchPlaceholder: string;
+    badge: string;
+    badgeColor: string;
+  }> = {
     home: {
       title: 'Earning Reward',
       subtitle: `Halo, ${userName} • ${educationLevel} (${userAge} Th)`,
@@ -62,24 +68,24 @@ export function AdaptiveTopHeader({
       badge: 'ONLINE',
       badgeColor: 'bg-emerald-500',
     },
-    subjects: {
-      title: 'Katalog Pelajaran',
-      subtitle: `Modul Kurikulum ${educationLevel} Terpersonalilasi`,
-      searchPlaceholder: 'Cari mata pelajaran atau topik...',
-      badge: 'KURIKULUM',
+    search: {
+      title: 'Discover',
+      subtitle: 'Find your favorite book',
+      searchPlaceholder: 'Search by title & more...',
+      badge: 'DISCOVER',
       badgeColor: 'bg-blue-500',
     },
-    game: {
-      title: 'Misi & Game Edu',
-      subtitle: 'Kumpulkan XP & Token Belajar Harian',
-      searchPlaceholder: 'Cari tantangan kuis harian...',
-      badge: 'DAILY',
+    mybook: {
+      title: 'My Book & Modul',
+      subtitle: `Modul Kurikulum ${educationLevel}`,
+      searchPlaceholder: 'Cari materi kurikulum...',
+      badge: 'KURIKULUM',
       badgeColor: 'bg-purple-500',
     },
-    rewards: {
-      title: 'Katalog Bot WA',
+    quiz: {
+      title: 'Kuis & Bot WA',
       subtitle: 'Tukar Poin Jadi Akses Bot WA Premium',
-      searchPlaceholder: 'Cari paket durasi 1 hari s/d 1 minggu...',
+      searchPlaceholder: 'Cari kuis atau paket bot...',
       badge: 'VIP WA',
       badgeColor: 'bg-emerald-500',
     },
@@ -90,7 +96,8 @@ export function AdaptiveTopHeader({
       badge: 'VERIFIKASI',
       badgeColor: 'bg-amber-500',
     },
-  }[activeTab];
+  };
+  const tabConfig = tabConfigMap[activeTab] || tabConfigMap.home;
 
   const notifications = [
     {
