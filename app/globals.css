@@ -1,1 +1,21 @@
 @import "tailwindcss";
+
+html, body {
+  touch-action: manipulation;
+  -webkit-text-size-adjust: 100%;
+  overscroll-behavior-y: none;
+}
+
+/* Prevent double-tap zoom on mobile web */
+button, input, select, textarea, a {
+  touch-action: manipulation;
+}
+
+/* Hide scrollbar for horizontal subject carousel */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

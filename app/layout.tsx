@@ -1,18 +1,26 @@
-import type {Metadata} from 'next';
+import type {Metadata, Viewport} from 'next';
 import './globals.css'; // Global styles
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover',
+};
 
 export const metadata: Metadata = {
   title: 'Earning Reward - Interactive Onboarding',
-  description: 'Interactive educational game onboarding with 3D blue bird mascot and personalized curriculum for Earning Reward.',
+  description: 'Interactive educational game onboarding and learning dashboard with Dokter Aurel guide, personalized curriculum, and BOT WA rewards.',
   openGraph: {
     title: 'Earning Reward - Interactive Onboarding',
-    description: 'Interactive educational game onboarding with 3D blue bird mascot and personalized curriculum for Earning Reward.',
+    description: 'Interactive educational game onboarding and learning dashboard with Dokter Aurel guide, personalized curriculum, and BOT WA rewards.',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Earning Reward - Interactive Onboarding',
-    description: 'Interactive educational game onboarding with 3D blue bird mascot and personalized curriculum for Earning Reward.',
+    description: 'Interactive educational game onboarding and learning dashboard with Dokter Aurel guide, personalized curriculum, and BOT WA rewards.',
   },
 };
 

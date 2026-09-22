@@ -193,3 +193,133 @@ export function getSubjectsForLevel(
       return SMA_SUBJECTS;
   }
 }
+
+export interface WABotReward {
+  id: string;
+  duration: string;
+  days: number;
+  xpCost: number;
+  badge: string;
+  isPopular?: boolean;
+  features: string[];
+}
+
+export const WA_BOT_REWARDS: WABotReward[] = [
+  {
+    id: 'wa-bot-1d',
+    duration: '1 Hari',
+    days: 1,
+    xpCost: 1250,
+    badge: 'STARTER',
+    features: [
+      'Akses Penuh BOT WA Premium 24 Jam',
+      'AI Gemini Pro Terintegrasi',
+      'Support Chat Pribadi & Grup',
+      'Respons Kilat tanpa antrean',
+    ],
+  },
+  {
+    id: 'wa-bot-2d',
+    duration: '2 Hari',
+    days: 2,
+    xpCost: 2300,
+    badge: 'HEMAT',
+    features: [
+      'Akses Penuh BOT WA 48 Jam',
+      'Kirim Dokumen & Gambar HD',
+      'Fitur Otomasi Tugas Sekolah/Kuliah',
+      'Garansi Uptime 100%',
+    ],
+  },
+  {
+    id: 'wa-bot-3d',
+    duration: '3 Hari',
+    days: 3,
+    xpCost: 3400,
+    badge: 'REKOMENDASI',
+    isPopular: true,
+    features: [
+      'Akses 3 Hari Penuh (72 Jam)',
+      'Fitur Bot Premium Lengkap',
+      'Prioritas Server VIP Super Cepat',
+      'Bantu Kerjakan Soal & Ringkasan Materi',
+    ],
+  },
+  {
+    id: 'wa-bot-5d',
+    duration: '5 Hari',
+    days: 5,
+    xpCost: 5200,
+    badge: 'PRO',
+    features: [
+      'Akses 5 Hari Non-Stop',
+      'Support Voice Note AI WA',
+      'Akses Tanpa Batas Kuota Harian',
+      'Customer Support Prioritas',
+    ],
+  },
+  {
+    id: 'wa-bot-7d',
+    duration: '1 Minggu (7 Hari)',
+    days: 7,
+    xpCost: 7000,
+    badge: 'ULTIMATE',
+    isPopular: true,
+    features: [
+      'Akses 1 Minggu Penuh (7 Hari)',
+      'Semua Fitur Premium Terbuka Penuh',
+      'VIP Node Jalur Khusus Tercepat',
+      'Bisa Diundang ke 3 Grup WA Berbeda',
+      'Bonus Ekstra Token Tugas AI',
+    ],
+  },
+];
+
+export interface QuizQuestion {
+  q: string;
+  options: string[];
+  correct: number;
+  hint: string;
+  explanation: string;
+}
+
+export function getQuestionsForSubject(subjectName: string, level: string): QuizQuestion[] {
+  return [
+    {
+      q: `Dalam materi ${subjectName} tingkat ${level}, apa prinsip utama yang harus diutamakan saat menganalisis sebuah persoalan?`,
+      options: [
+        'Memahami konsep dasar, premis, dan alur penalaran sistematis',
+        'Menghafal rumus akhir tanpa menelaah variabel yang terkait',
+        'Mengabaikan data sekunder dan langsung menarik kesimpulan instan',
+        'Menebak jawaban tercepat tanpa pengujian logis',
+      ],
+      correct: 0,
+      hint: 'Fokus pada fondasi metodologis: penalaran logis dan pemahaman konsep selalu mengalahkan sekadar hafalan mekanis.',
+      explanation: 'Pemahaman konsep dan alur penalaran sistematis memungkinkan siswa menyelesaikan variasi soal yang kompleks.',
+    },
+    {
+      q: `Bagaimana penerapan praktis materi ${subjectName} untuk memaksimalkan hasil belajar di jenjang ${level}?`,
+      options: [
+        'Hanya membaca materi sekali tanpa latihan soal berkala',
+        'Berlatih memecahkan studi kasus kontekstual dan melakukan evaluasi mandiri',
+        'Menghindari diskusi dengan guru maupun teman sekelas',
+        'Mengandalkan keberuntungan saat evaluasi ujian',
+      ],
+      correct: 1,
+      hint: 'Latihan berbasis studi kasus kontekstual dan refleksi diri akan memperkuat ingatan jangka panjang (long-term memory).',
+      explanation: 'Studi kasus kontekstual melatih keterampilan berpikir kritis (critical thinking) dan daya ingat yang aplikatif.',
+    },
+    {
+      q: `Dalam ekosistem pembelajaran Earning Reward, strategi apa yang paling efektif untuk mengumpulkan poin reward bot WA premium?`,
+      options: [
+        'Mengerjakan kuis harian secara konsisten dan menjaga streak belajar harian',
+        'Hanya login seminggu sekali',
+        'Mengosongkan kuis latihan',
+        'Menghapus progres pembelajaran',
+      ],
+      correct: 0,
+      hint: 'Konsistensi harian (daily streak) memberikan pengganda bonus poin (XP multiplier) yang signifikan.',
+      explanation: 'Streak check-in harian dan pengerjaan kuis materi secara rutin menghasilkan akumulasi poin terbesar.',
+    },
+  ];
+}

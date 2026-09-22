@@ -11,15 +11,17 @@ interface CloudSpeechBubbleProps {
   onTypingFinished?: () => void;
   children?: React.ReactNode;
   bubbleKey?: string | number;
+  tailPosition?: 'left' | 'bottom-left' | 'bottom';
 }
 
 export function CloudSpeechBubble({
   id = 'onboarding-speech-bubble',
   text,
-  speedMs = 32,
+  speedMs = 28,
   onTypingFinished,
   children,
   bubbleKey = 'bubble',
+  tailPosition = 'left',
 }: CloudSpeechBubbleProps) {
   const [displayedText, setDisplayedText] = useState('');
   const [isTyping, setIsTyping] = useState(true);
@@ -62,13 +64,13 @@ export function CloudSpeechBubble({
             onTypingFinished();
           }
 
-          // Wait 500-750ms before revealing interaction button/form controls
+          // Wait 400ms before revealing interaction button/form controls
           setTimeout(() => {
             if (!isCancelled) setShowControls(true);
-          }, 600);
+          }, 450);
         }
       }, speedMs);
-    }, 280);
+    }, 200);
 
     return () => {
       isCancelled = true;
@@ -82,45 +84,49 @@ export function CloudSpeechBubble({
       <motion.div
         key={bubbleKey}
         id={id}
-        initial={{ opacity: 0, scale: 0.92, y: 15 }}
+        initial={{ opacity: 0, scale: 0.95, y: 10, filter: 'blur(6px)' }}
         animate={{
           opacity: 1,
           scale: 1,
           y: 0,
+          filter: 'blur(0px)',
           transition: {
-            duration: 0.45,
+            duration: 0.4,
             ease: [0.22, 1, 0.36, 1],
           },
         }}
         exit={{
           opacity: 0,
-          scale: 0.95,
+          scale: 0.96,
           y: -10,
-          transition: { duration: 0.25 },
+          filter: 'blur(6px)',
+          transition: { duration: 0.2 },
         }}
-        className="relative w-full max-w-[430px] mx-auto z-20 flex flex-col items-center"
+        className="relative w-full z-20 flex flex-col items-center"
       >
-        {/* Cloud-like outer container with multi-layered soft shadows & 3D bevel */}
-        <div className="relative w-full rounded-3xl bg-white/95 backdrop-blur-xl p-5 sm:p-6 shadow-[0_20px_50px_rgba(30,58,138,0.16),0_4px_12px_rgba(99,102,241,0.08)] border-2 border-white/80 transition-all">
+        {/* Cloud-like outer container with multi-layered soft shadows & seamless blend */}
+        <div className="relative w-full rounded-3xl bg-white/95 backdrop-blur-xl p-5 sm:p-6 shadow-[0_16px_40px_rgba(30,58,138,0.12),0_4px_12px_rgba(99,102,241,0.06)] border-2 border-white/80 transition-all">
           {/* Subtle 3D Top Specular Lighting Line */}
           <div className="absolute inset-x-6 top-1 h-[2px] bg-gradient-to-r from-transparent via-white to-transparent opacity-80 rounded-full pointer-events-none" />
 
-          {/* Cloud Bubble Tail pointing down towards the Blue Bird */}
-          <div className="absolute -bottom-3 left-12 w-6 h-6 bg-white rotate-45 border-b-2 border-r-2 border-slate-100/60 shadow-[3px_4px_8px_rgba(30,58,138,0.08)] rounded-sm" />
+          {/* Speech Bubble Tail pointing towards Dokter Aurel */}
+          {tailPosition === 'left' && (
+            <div className="absolute top-1/2 -left-3 -translate-y-1/2 w-5 h-5 bg-white rotate-45 border-l-2 border-b-2 border-slate-100 shadow-[-3px_4px_8px_rgba(30,58,138,0.05)] rounded-xs hidden sm:block" />
+          )}
 
-          {/* Decorative Cloud Billow Accents */}
-          <div className="absolute -top-3 left-8 w-12 h-6 bg-white/90 rounded-full blur-[1px] -z-10 pointer-events-none" />
-          <div className="absolute -top-4 right-12 w-16 h-8 bg-white/90 rounded-full blur-[1px] -z-10 pointer-events-none" />
+          {tailPosition === 'bottom-left' && (
+            <div className="absolute -bottom-2.5 left-10 w-5 h-5 bg-white rotate-45 border-b-2 border-r-2 border-slate-100 shadow-[3px_4px_8px_rgba(30,58,138,0.06)] rounded-xs" />
+          )}
 
           {/* Typewriter Text Display */}
           <div className="relative z-10">
-            <p className="text-slate-800 text-[19px] sm:text-[22px] md:text-[24px] font-extrabold tracking-tight leading-[1.38] antialiased">
+            <p className="text-slate-800 text-[18px] sm:text-[21px] md:text-[23px] font-extrabold tracking-tight leading-[1.38] antialiased">
               {displayedText}
               {isTyping && (
                 <motion.span
                   animate={{ opacity: [1, 0, 1] }}
                   transition={{ duration: 0.7, repeat: Infinity }}
-                  className="inline-block w-2.5 h-5 ml-1 bg-blue-600 rounded-sm align-middle"
+                  className="inline-block w-2.5 h-5 ml-1 bg-cyan-600 rounded-sm align-middle"
                 />
               )}
             </p>
@@ -133,17 +139,18 @@ export function CloudSpeechBubble({
             <AnimatePresence>
               {showControls && (
                 <motion.div
-                  initial={{ opacity: 0, y: 14, scale: 0.98 }}
+                  initial={{ opacity: 0, y: 12, scale: 0.98, filter: 'blur(4px)' }}
                   animate={{
                     opacity: 1,
                     y: 0,
                     scale: 1,
+                    filter: 'blur(0px)',
                     transition: {
-                      duration: 0.4,
+                      duration: 0.35,
                       ease: [0.22, 1, 0.36, 1],
                     },
                   }}
-                  exit={{ opacity: 0, y: -6 }}
+                  exit={{ opacity: 0, y: -6, filter: 'blur(4px)' }}
                   className="w-full"
                 >
                   {children}

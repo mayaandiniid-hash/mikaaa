@@ -148,29 +148,40 @@ export function playButtonClick(): void {
 }
 
 /**
- * Melodic rising counter tick for numeric step changes
+ * Rapid counter number rolling sound effect ("tr-r-r-r-tik-tik!")
+ * Simulates rapid rolling digits or mechanical odometer spinning numbers quickly.
  */
-export function playCounterTick(freq = 600): void {
+export function playCounterTick(freq = 1200): void {
   if (!soundEnabled) return;
   tryPlayAudioFile('counter.mp3', () => {
     const ctx = initAudio();
     if (!ctx) return;
 
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
+    // Series of 8 rapid micro clicks/ticks in ~240ms with escalating pitch
+    const tickCount = 8;
+    const interval = 0.028; // 28ms between rapid number increments
 
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(freq, ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(freq * 1.25, ctx.currentTime + 0.05);
+    for (let i = 0; i < tickCount; i++) {
+      const startTime = ctx.currentTime + i * interval;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
 
-    gain.gain.setValueAtTime(0.08, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.05);
+      // Sharp crisp click tone ramping slightly up like rolling digits
+      const basePitch = freq + i * 110;
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(basePitch, startTime);
+      osc.frequency.exponentialRampToValueAtTime(basePitch * 0.4, startTime + 0.015);
 
-    osc.connect(gain);
-    gain.connect(ctx.destination);
+      gain.gain.setValueAtTime(0, startTime);
+      gain.gain.linearRampToValueAtTime(0.09, startTime + 0.002);
+      gain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.018);
 
-    osc.start();
-    osc.stop(ctx.currentTime + 0.05);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(startTime);
+      osc.stop(startTime + 0.02);
+    }
   });
 }
 
@@ -232,5 +243,91 @@ export function playTransitionSound(): void {
 
     osc.start();
     osc.stop(ctx.currentTime + 0.25);
+  });
+}
+
+/**
+ * Countdown ticking sound for exam timer (soft tick or urgent higher pitch beep)
+ */
+export function playCountdownTick(isUrgent = false): void {
+  if (!soundEnabled) return;
+  tryPlayAudioFile('tick.mp3', () => {
+    const ctx = initAudio();
+    if (!ctx) return;
+
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = isUrgent ? 'sawtooth' : 'sine';
+    const freq = isUrgent ? 880 : 440; // A5 for urgent, A4 for normal
+    osc.frequency.setValueAtTime(freq, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(freq * 0.8, ctx.currentTime + 0.04);
+
+    gain.gain.setValueAtTime(isUrgent ? 0.12 : 0.06, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.05);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start();
+    osc.stop(ctx.currentTime + 0.05);
+  });
+}
+
+/**
+ * Urgent warning buzzer or chime when time is running out or answer wrong
+ */
+export function playWarningSound(): void {
+  if (!soundEnabled) return;
+  tryPlayAudioFile('warning.mp3', () => {
+    const ctx = initAudio();
+    if (!ctx) return;
+
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(320, ctx.currentTime);
+    osc.frequency.linearRampToValueAtTime(220, ctx.currentTime + 0.2);
+
+    gain.gain.setValueAtTime(0.14, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start();
+    osc.stop(ctx.currentTime + 0.2);
+  });
+}
+
+/**
+ * Inspiring hint chime when student unlocks/views a hint
+ */
+export function playHintSound(): void {
+  if (!soundEnabled) return;
+  tryPlayAudioFile('hint.mp3', () => {
+    const ctx = initAudio();
+    if (!ctx) return;
+
+    const notes = [659.25, 880]; // E5, A5
+    notes.forEach((freq, idx) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      const startTime = ctx.currentTime + idx * 0.06;
+
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, startTime);
+
+      gain.gain.setValueAtTime(0, startTime);
+      gain.gain.linearRampToValueAtTime(0.1, startTime + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.25);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(startTime);
+      osc.stop(startTime + 0.26);
+    });
   });
 }
