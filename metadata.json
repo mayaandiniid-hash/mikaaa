@@ -1,0 +1,7 @@
+{
+  "name": "Earning Reward - Interactive Onboarding",
+  "description": "Interactive educational game onboarding with 3D blue bird mascot and personalized curriculum for Earning Reward.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
